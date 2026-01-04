@@ -64,7 +64,7 @@ A complete e-commerce payment gateway built with **Spring Boot** and **Razorpay 
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/razorpay-payment-gateway.git
+   git clone https://github.com/VedantBankewar/razorpay-payment-gateway.git
    cd razorpay-payment-gateway
    ```
 
