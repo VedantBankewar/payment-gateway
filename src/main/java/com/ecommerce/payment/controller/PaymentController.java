@@ -19,9 +19,15 @@ import java.util.Map;
 public class PaymentController {
 
     private final PaymentService paymentService;
+    private final com.ecommerce.payment.service.OrderService orderService;
+    private final com.ecommerce.payment.service.BillingService billingService;
 
-    public PaymentController(PaymentService paymentService) {
+    public PaymentController(PaymentService paymentService,
+            com.ecommerce.payment.service.OrderService orderService,
+            com.ecommerce.payment.service.BillingService billingService) {
         this.paymentService = paymentService;
+        this.orderService = orderService;
+        this.billingService = billingService;
     }
 
     /**
@@ -74,6 +80,17 @@ public class PaymentController {
         PaymentResponse response = paymentService.verifyPayment(request);
 
         if (response.isSuccess()) {
+            // Update local order status and create billing record
+            com.ecommerce.payment.model.Order order = orderService
+                    .findByRazorpayOrderId(request.getRazorpay_order_id());
+
+            if (order != null) {
+                orderService.updateOrderStatus(order.getOrderId(), "PAID");
+                billingService.createBillingRecord(order, request.getRazorpay_payment_id(), "SUCCESS", "ONLINE");
+
+                // Add local order ID to response
+                response.setOrderId(order.getOrderId());
+            }
             return ResponseEntity.ok(response);
         } else {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
